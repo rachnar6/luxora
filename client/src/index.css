@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #FAFAFA;
+  color: #4A4A4A;
+}
+
+/* --- ✅ FIX STARTS HERE --- */
+
+/* This hides the default Google Translate dropdown menu */
+#google_translate_element {
+  display: none;
+}
+
+/* This hides the banner that appears at the top of the page */
+.goog-te-banner-frame {
+  display: none !important;
+}
+
+/* This prevents the banner from pushing your whole site down */
+body {
+  top: 0 !important;
+}
+
+/* --- ✅ FIX ENDS HERE --- */
+
+
+/* For the typewriter caret effect */
+.typing-effect {
+  border-right: .15em solid #FF6F61; /* Primary color */
+  white-space: nowrap;
+  overflow: hidden;
+  animation: 
+    typing 1.5s steps(6, end),
+    blink-caret .75s step-end infinite;
+}
+
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+@keyframes blink-caret {
+  from, to { border-color: transparent }
+  50% { border-color: #FF6F61; } /* Primary color */
+}
+
+
+.pop-in {
+    animation: popIn 0.5s ease-out forwards;
+}
+
+@keyframes popIn {
+    0% { opacity: 0; transform: scale(0.5); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.3s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in-down {
+    animation: fadeInDown 0.2s ease-out forwards;
+}
+
+@keyframes fadeInDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
