@@ -55,6 +55,4 @@ router.route('/shared/:token/comment').post(protect, addComment);
 
 router.route('/:id/chat').post(protect, addChatMessage);
 
-
-
 export default router;

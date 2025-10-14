@@ -1,5 +1,7 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+// 1. ADD 'useLocation' to this import
+import { Routes, Route, useLocation } from 'react-router-dom'; 
+
 import Header from './components/common/Header';
 import Footer from './components/common/Footer';
 import Chatbot from './components/common/Chatbot';
@@ -44,11 +46,26 @@ import UserEditPage from './pages/admin/UserEditPage';
 import SellerListPage from './pages/admin/SellerListPage';
 import ProductsBySellerPage from './pages/admin/ProductsBySellerPage';
 import SellerApplicationsPage from './pages/admin/SellerApplicationsPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import ChatBox from './components/wishlist/ChatBox'; 
 
 // --- Seller Page Imports ---
 import MyProductsPage from './pages/seller/MyProductsPage'; 
 import ProductCreatePage from './pages/seller/ProductCreatePage'; 
 import MySalesPage from './pages/seller/MySalesPage';
+
+// 3. ADD THIS HELPER COMPONENT
+// This small component checks the URL and decides if the ChatBox should be rendered.
+const ChatRenderer = () => {
+    const location = useLocation();
+    // This regex checks if the URL is '/wishlist/' followed by some ID
+    const match = location.pathname.match(/^\/wishlist\/(.+)/);
+    const wishlistId = match ? match[1] : null;
+
+    // We only need to pass wishlistId. ChatBox gets user info and messages itself.
+    return wishlistId ? <ChatBox wishlistId={wishlistId} /> : null;
+};
 
 function App() {
   return (
@@ -57,7 +74,7 @@ function App() {
       <Header />
       <main className="flex-grow container mx-auto px-4 py-8">
         <Routes>
-          {/* --- Public Routes --- */}
+          {/* --- All your existing routes go here, unchanged --- */}
           <Route path="/" element={<HomePage />} />
           <Route path="/product/:id" element={<ProductPage />} />
           <Route path="/cart" element={<CartPage />} />
@@ -78,7 +95,10 @@ function App() {
           <Route path="/order/:id" element={<OrderDetailsPage />} />
           <Route path="/login/success" element={<GoogleAuthCallbackPage />} />
           <Route path="/shared-wishlist/:id" element={<SharedWishlistPage />} />
-                      
+          <Route path="/forgotpassword" element={<ForgotPasswordPage />} />
+          <Route path="/resetpassword/:token" element={<ResetPasswordPage />} />
+          
+                    
           {/* --- Private User Routes --- */}
           <Route path="" element={<PrivateRoute />}>
             <Route path="/wishlist" element={<WishlistPage />} />
@@ -106,11 +126,13 @@ function App() {
             <Route path="seller/:id/products" element={<ProductsBySellerPage />} />
             <Route path="seller-applications" element={<SellerApplicationsPage />} />
           </Route>
-
         </Routes>
       </main>
       <Footer />
       <Chatbot />
+      
+      {/* 4. RENDER THE CHAT HELPER HERE, AT THE END */}
+      <ChatRenderer />
     </div>
   );
 }

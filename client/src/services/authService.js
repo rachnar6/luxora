@@ -31,4 +31,15 @@ const deleteProfile = async () => {
     return data;
 };
 
-export { login, register, logout, updateProfile, deleteProfile};
+const forgotPassword = async (email) => {
+    const { data } = await API.post('/auth/forgotpassword', { email });
+    return data;
+};
+
+// 👇 ADD THIS
+const resetPassword = async (token, password) => {
+    const { data } = await API.post(`/auth/resetpassword/${token}`, { password });
+    return data;
+};
+
+export { login, register, logout, updateProfile, deleteProfile, forgotPassword, resetPassword };

@@ -5,6 +5,8 @@ import {
   registerUser,
   getUserProfile,
   updateUserProfile,
+  forgotPassword,
+  resetPassword
 } from '../controllers/authController.js';
 import { protect } from '../middleware/authMiddleware.js';
 import generateToken from '../utils/generateToken.js';
@@ -22,6 +24,10 @@ router.route('/profile').get(protect, getUserProfile).put(protect, updateUserPro
 // @route   GET /api/auth/google
 // @access  Public
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+
+router.post('/forgotpassword', forgotPassword);
+router.post('/resetpassword/:token', resetPassword);
 
 // @desc    Google auth callback (where Google redirects to after login)
 // @route   GET /api/auth/google/callback

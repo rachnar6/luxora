@@ -1,6 +1,9 @@
+// server/controllers/authController.js
+import crypto from 'crypto';
 import asyncHandler from '../utils/asyncHandler.js';
 import User from '../models/User.js';
 import generateToken from '../utils/generateToken.js';
+import sendEmail from '../utils/sendEmail.js';
 
 // @desc    Auth user & get token
 // @route   POST /api/auth/login
@@ -15,7 +18,6 @@ const loginUser = asyncHandler(async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      // CHANGED: Pass the full user object
       token: generateToken(user),
     });
   } else {
@@ -48,7 +50,6 @@ const registerUser = asyncHandler(async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      // CHANGED: Pass the full user object
       token: generateToken(user),
     });
   } else {
@@ -61,7 +62,7 @@ const registerUser = asyncHandler(async (req, res) => {
 // @route   GET /api/auth/profile
 // @access  Private
 const getUserProfile = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user.id); // Use req.user.id from the decoded token
+  const user = await User.findById(req.user.id);
 
   if (user) {
     res.json({
@@ -96,7 +97,6 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       name: updatedUser.name,
       email: updatedUser.email,
       role: updatedUser.role,
-      // CHANGED: Pass the full user object
       token: generateToken(updatedUser),
     });
   } else {
@@ -105,4 +105,81 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   }
 });
 
-export { loginUser, registerUser, getUserProfile, updateUserProfile };
+
+// @desc    Forgot password
+// @route   POST /api/auth/forgotpassword
+// @access  Public
+const forgotPassword = asyncHandler(async (req, res, next) => {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+        res.status(404);
+        throw new Error('There is no user with that email address.');
+    }
+
+    const resetToken = user.createPasswordResetToken();
+    await user.save({ validateBeforeSave: false });
+
+    const resetURL = `http://localhost:3000/resetpassword/${resetToken}`;
+    const message = `Forgot your password? Click the link to reset it: ${resetURL} \n\nIf you didn't forget your password, please ignore this email!`;
+
+    try {
+        await sendEmail({
+            email: user.email,
+            subject: 'Your password reset token (valid for 10 min)',
+            message,
+        });
+
+        res.status(200).json({
+            status: 'success',
+            message: 'Token sent to email!',
+        });
+    } catch (err) {
+        console.error(err);
+        user.passwordResetToken = undefined;
+        user.passwordResetExpires = undefined;
+        await user.save({ validateBeforeSave: false });
+
+        throw new Error('There was an error sending the email. Try again later!');
+    }
+});
+
+// @desc    Reset password
+// @route   POST /api/auth/resetpassword/:token
+// @access  Public
+const resetPassword = asyncHandler(async (req, res, next) => {
+    const hashedToken = crypto
+        .createHash('sha266')
+        .update(req.params.token)
+        .digest('hex');
+
+    const user = await User.findOne({
+        passwordResetToken: hashedToken,
+        passwordResetExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+        res.status(400);
+        throw new Error('Token is invalid or has expired');
+    }
+
+    user.password = req.body.password;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();
+    
+    res.status(200).json({
+        status: 'success',
+        message: 'Password successfully updated!',
+        token: generateToken(user),
+    });
+});
+
+// THIS IS THE BLOCK THAT NEEDED FIXING
+export { 
+    loginUser, 
+    registerUser, 
+    getUserProfile, 
+    updateUserProfile, 
+    forgotPassword,
+    resetPassword,
+};

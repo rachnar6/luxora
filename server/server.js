@@ -19,6 +19,8 @@ import commentRoutes from './routes/commentRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import chatbotRoutes from './routes/chatbotRoutes.js';
+import Wishlist from './models/wishlistModel.js';
+
 
 connectDB();
 

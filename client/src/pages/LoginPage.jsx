@@ -99,6 +99,12 @@ const LoginPage = () => {
           <button type="submit" className="w-full px-6 py-3 bg-primary text-white rounded-lg font-semibold text-lg hover:bg-primary-dark transition-colors" disabled={loading}>
             {loading ? <LoadingSpinner /> : 'Sign In'}
           </button>
+
+          <div className="text-sm text-right mt-4">
+          <Link to="/forgotpassword" className="font-medium text-primary hover:text-primary-dark">
+            Forgot password?
+          </Link>
+          </div>
         </form>
         
         {/* ADDED: Divider and Google Login Button */}

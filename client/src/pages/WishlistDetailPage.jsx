@@ -6,7 +6,7 @@ import { useWishlist } from '../contexts/WishlistContext';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ShareWishlistModal from '../components/wishlist/ShareWishlistModal';
 import VotersListModal from '../components/wishlist/VotersListModal';
-import ChatBox from '../components/wishlist/ChatBox'; // 1. Ensure ChatBox is imported
+// We no longer import ChatBox here
 import AddProductsModal from '../components/wishlist/AddProductsModal';
 import { Heart, Users, ThumbsUp, ThumbsDown, PlusCircle, Trash2 } from 'lucide-react';
 
@@ -33,7 +33,6 @@ const WishlistDetailPage = () => {
     const loadWishlist = useCallback(async () => {
         if (!token || !wishlistId) return;
         try {
-            // Only show full-page spinner on initial load
             if (!wishlist) setLoading(true);
             const data = await getWishlistById(wishlistId, token);
             setWishlist(data);
@@ -46,7 +45,8 @@ const WishlistDetailPage = () => {
 
     useEffect(() => {
         loadWishlist();
-    }, [loadWishlist, wishlistId]); // Re-fetch if the URL ID changes
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [wishlistId]);
 
     const handleRating = async (itemId, voteType) => {
         try {
@@ -69,11 +69,8 @@ const WishlistDetailPage = () => {
     if (!wishlist) return <div className="text-center text-gray-500 mt-8">Wishlist not found.</div>;
 
     const isOwner = wishlist.user?._id === user?._id;
-    const canViewChat = isOwner || wishlist.sharedWith.some(u => (u._id || u) === user._id);
-
-    const totalValue = wishlist.items.reduce((acc, item) => {
-        return acc + (item.product ? item.product.price : 0);
-    }, 0);
+    // The canViewChat variable is no longer needed here
+    const totalValue = wishlist.items.reduce((acc, item) => acc + (item.product ? item.product.price : 0), 0);
 
     return (
         <>
@@ -111,6 +108,7 @@ const WishlistDetailPage = () => {
                 </p>
 
                 <div className="space-y-4">
+                    {/* All of your item mapping logic remains the same */}
                     {wishlist.items.length > 0 ? (
                         wishlist.items.filter(item => item.product).map((item) => {
                             const likers = item.ratings.filter(r => r.vote === 'like').map(r => r.user).filter(Boolean);
@@ -167,9 +165,7 @@ const WishlistDetailPage = () => {
                 </div>
             </div>
 
-            {/* ✅ 2. THE LIVE CHAT IS NOW BACK */}
-            {/* It will only appear on this page if the user has permission */}
-            {canViewChat && wishlist.chat && <ChatBox wishlistId={wishlist._id} initialMessages={wishlist.chat} />}
+            {/* The ChatBox is no longer rendered here. It's handled by App.jsx */}
             
             {isShareModalOpen && <ShareWishlistModal currentWishlist={wishlist} onClose={() => { setIsShareModalOpen(false); loadWishlist(); }} />}
             {modalData && <VotersListModal {...modalData} onClose={() => setModalData(null)} />}
@@ -187,4 +183,3 @@ const WishlistDetailPage = () => {
 };
 
 export default WishlistDetailPage;
-
