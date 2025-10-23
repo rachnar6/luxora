@@ -1,1 +1,13 @@
-server/.env 
+node_modules
+/client/node_modules
+/server/node_modules
+
+# Build artifacts
+/client/build
+/client/dist
+
+# Environment variables
+.env
+/client/.env
+/server/.env
+

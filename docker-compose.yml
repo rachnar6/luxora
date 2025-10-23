@@ -1,0 +1,18 @@
+services:
+  server:
+    build: ./server
+    container_name: luxora-backend
+    ports:
+      - "5000:5000" # Maps host port 5000 to container port 5000
+    env_file:
+      - ./.env # Tells Docker Compose to use your .env file
+    restart: unless-stopped
+
+  client:
+    build: ./client
+    container_name: luxora-frontend
+    ports:
+      - "3000:80" # Maps host port 3000 to container port 80 (Nginx)
+    depends_on:
+      - server
+    restart: unless-stopped
