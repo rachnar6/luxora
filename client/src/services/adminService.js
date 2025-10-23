@@ -107,3 +107,14 @@ export const getSellers = async (token) => {
   const { data } = await axios.get('/api/admin/sellers', config);
   return data;
 };
+
+export const updateOrderStatus = async (orderId, status, token) => {
+    const config = { 
+        headers: { 
+            'Content-Type': 'application/json', 
+            Authorization: `Bearer ${token}` 
+        } 
+    };
+    const { data } = await axios.put(`/api/orders/${orderId}/status`, { status }, config);
+    return data;
+};

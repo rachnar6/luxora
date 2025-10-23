@@ -57,6 +57,24 @@ const createRazorpayOrder = async (order, token) => {
     return data;
 };
 
+const updateOrderStatus = async (orderId, status, token) => {
+    const config = { 
+        headers: { 
+            'Content-Type': 'application/json', 
+            Authorization: `Bearer ${token}` 
+        } 
+    };
+    const { data } = await axios.put(`/api/orders/${orderId}/status`, { status }, config);
+    return data;
+};
+
+const requestReturn = async (orderId, itemId, reason /*, token - Handled by API? */) => {
+    const requestBody = { reason: reason }; // Send reason in the body
+    // PUT /api/orders/:orderId/items/:itemId/return
+    const { data } = await API.put(`/orders/${orderId}/items/${itemId}/return`, requestBody);
+    return data; // Return updated order
+};
+
 export { 
     addOrderItems, 
     getMyOrders, 
@@ -65,5 +83,7 @@ export {
     updateOrderToPaid, 
     getMySales,
     getRazorpayKeyId,
-    createRazorpayOrder 
+    createRazorpayOrder,
+    updateOrderStatus,
+    requestReturn
 };

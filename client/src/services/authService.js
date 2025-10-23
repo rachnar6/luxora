@@ -1,33 +1,47 @@
-// client/src/services/authService.js
-// Authentication service functions
-
-import API from './api';
+import API from './api'; // Assuming API is your configured axios instance
 
 const login = async (email, password) => {
-  const { data } = await API.post('/auth/login', { email, password });
-  localStorage.setItem('userInfo', JSON.stringify(data));
-  return data;
-};
-
-const register = async (name, email, password) => {
-  const { data } = await API.post('/auth/register', { name, email, password });
-  localStorage.setItem('userInfo', JSON.stringify(data));
-  return data;
-};
-
-const logout = () => {
-  localStorage.removeItem('userInfo');
-};
-
-const updateProfile = async (userData) => {
-    const { data } = await API.put('/auth/profile', userData);
-    // Update localStorage with the new user info (which includes a new token)
-    localStorage.setItem('userInfo', JSON.stringify(data));
+    const { data } = await API.post('/auth/login', { email, password });
     return data;
 };
 
-const deleteProfile = async () => {
-    const { data } = await API.delete('/users/profile');
+const register = async (name, email, password) => {
+    const { data } = await API.post('/auth/register', { name, email, password });
+    return data;
+};
+
+const logout = () => {
+    // AuthContext handles removing from localStorage
+};
+
+// --- THIS IS THE NEW FUNCTION ---
+const getProfile = async (token) => {
+    const config = {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    };
+    // This endpoint gets the freshest user data from the database
+    const { data } = await API.get('/auth/profile', config);
+    return data;
+};
+// -----------------------------
+
+const updateProfile = async (formData, token) => {
+    const config = {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    };
+    const { data } = await API.put('/users/profile', formData, config);
+    return data;
+};
+
+const deleteProfile = async (token) => {
+     const config = {
+         headers: { Authorization: `Bearer ${token}` }
+     };
+    const { data } = await API.delete('/users/profile', config);
     return data;
 };
 
@@ -36,10 +50,18 @@ const forgotPassword = async (email) => {
     return data;
 };
 
-// 👇 ADD THIS
 const resetPassword = async (token, password) => {
     const { data } = await API.post(`/auth/resetpassword/${token}`, { password });
     return data;
 };
 
-export { login, register, logout, updateProfile, deleteProfile, forgotPassword, resetPassword };
+export {
+    login,
+    register,
+    logout,
+    updateProfile,
+    deleteProfile,
+    forgotPassword,
+    resetPassword,
+    getProfile // <-- Make sure to export the new function
+};

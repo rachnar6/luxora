@@ -23,3 +23,8 @@ export const removeFromCart = async (productId) => {
     const { data } = await API.delete(`/cart/${productId}`);
     return data;
 };
+
+export const clearCart = async () => {
+    // This sends a DELETE request to the new endpoint we will create
+    await API.delete('/cart');
+};

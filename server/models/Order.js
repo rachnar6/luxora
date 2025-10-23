@@ -13,6 +13,17 @@ const orderItemSchema = mongoose.Schema({
         required: true,
         ref: 'Product',
     },
+    returnStatus: {
+        type: String,
+        enum: ['None', 'Requested', 'Approved', 'Rejected', 'Received', 'Refunded'], // Define possible statuses
+        default: 'None', // Default is no return active
+    },
+    returnReason: {
+        type: String, // Reason provided by customer
+    },
+    returnRequestedAt: {
+        type: Date, // When the return was requested
+    },
 });
 
 const orderSchema = mongoose.Schema(
@@ -29,6 +40,12 @@ const orderSchema = mongoose.Schema(
             postalCode: { type: String, required: true },
             country: { type: String, required: true },
         },
+        trackingHistory: [
+            {
+                status: { type: String, required: true },
+                updatedAt: { type: Date, default: Date.now },
+            }
+        ],
         paymentMethod: {
             type: String,
             required: true,
@@ -59,6 +76,12 @@ const orderSchema = mongoose.Schema(
             required: true,
             default: false,
         },
+        orderStatus: {
+            type: String,
+            required: true,
+            default: 'Pending', // Add a default status
+            enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Refunded'] // Optional: Define allowed statuses
+},
         paidAt: {
             type: Date,
         },
@@ -70,6 +93,7 @@ const orderSchema = mongoose.Schema(
         deliveredAt: {
             type: Date,
         },
+        
     },
     {
         timestamps: true,

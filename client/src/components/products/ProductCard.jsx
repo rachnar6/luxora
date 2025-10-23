@@ -27,6 +27,9 @@ const ProductCard = ({ product }) => {
     return null;
   }
 
+  // ✅ NEW: Calculate discount percentage if originalPrice exists
+  const discount = product.originalPrice ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
+
   const isInWishlist = wishlists.some(list => 
     list.items.some(item => item.product?._id === product._id)
   );
@@ -54,28 +57,50 @@ const ProductCard = ({ product }) => {
 
   return (
     <>
-      <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col dark:bg-gray-800 dark:border dark:border-gray-700">
+      <div className="bg-white rounded-lg shadow-sm hover:shadow-xl transition-shadow duration-300 flex flex-col dark:bg-gray-800 border border-transparent dark:border-gray-700">
+        
+        {/* Image container */}
         <Link to={`/product/${product._id}`} className="block relative h-48 overflow-hidden">
           <img
             src={product.image}
             alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/400x300/E0E7FF/3B82F6?text=No+Image`; }}
           />
+          {/* ✅ NEW: Discount badge */}
+          {discount > 0 && (
+            <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-md z-10">
+              {discount}% OFF
+            </div>
+          )}
         </Link>
+        
+        {/* Content container */}
         <div className="p-4 flex flex-col flex-grow">
-          <h3 className="text-xl font-semibold text-gray-800 mb-2 truncate dark:text-gray-100">
+          {/* Category/Brand */}
+          <p className="text-sm text-gray-500 mb-1 dark:text-gray-400">{product.category || product.brand}</p>
+          
+          {/* Product Name */}
+          <h3 className="text-lg font-semibold text-gray-800 mb-3 truncate dark:text-gray-100">
             <Link to={`/product/${product._id}`} className="hover:text-primary transition-colors duration-300">
               {product.name}
             </Link>
           </h3>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">{product.description}</p>
-          <div className="flex justify-between items-center mt-auto pt-2">
-            <span className="text-2xl font-bold text-primary">{formatCurrency(product.price)}</span>
-            <div className="flex space-x-2">
+          
+          {/* Price and Action Buttons */}
+          <div className="mt-auto pt-3 flex items-end justify-between">
+            {/* ✅ NEW: Price with optional original price */}
+            <div className="flex items-baseline gap-2">
+              <span className="text-xl font-bold text-gray-900 dark:text-white">{formatCurrency(product.price)}</span>
+              {product.originalPrice && (
+                <span className="text-sm text-gray-500 line-through">{formatCurrency(product.originalPrice)}</span>
+              )}
+            </div>
+            
+            <div className="flex items-center space-x-2">
               <button
                 onClick={handleWishlistClick}
-                className={`p-2 rounded-full transition-colors duration-300 ${isInWishlist ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-red-100 text-red-600 hover:bg-red-200 dark:bg-gray-700 dark:text-red-400 dark:hover:bg-gray-600'}`}
+                className={`p-2 rounded-full transition-colors duration-300 ${isInWishlist ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'}`}
                 title="Add to Wishlist"
               >
                 <Heart className="w-5 h-5" fill={isInWishlist ? 'currentColor' : 'none'} />
@@ -112,4 +137,3 @@ const ProductCard = ({ product }) => {
 };
 
 export default ProductCard;
-

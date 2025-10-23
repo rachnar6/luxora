@@ -6,7 +6,6 @@ import { useWishlist } from '../contexts/WishlistContext';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ShareWishlistModal from '../components/wishlist/ShareWishlistModal';
 import VotersListModal from '../components/wishlist/VotersListModal';
-// We no longer import ChatBox here
 import AddProductsModal from '../components/wishlist/AddProductsModal';
 import { Heart, Users, ThumbsUp, ThumbsDown, PlusCircle, Trash2 } from 'lucide-react';
 
@@ -68,9 +67,16 @@ const WishlistDetailPage = () => {
     if (error) return <div className="text-center text-red-500 mt-8">{error}</div>;
     if (!wishlist) return <div className="text-center text-gray-500 mt-8">Wishlist not found.</div>;
 
-    const isOwner = wishlist.user?._id === user?._id;
-    // The canViewChat variable is no longer needed here
-    const totalValue = wishlist.items.reduce((acc, item) => acc + (item.product ? item.product.price : 0), 0);
+const loggedInUserId = user?.id || user?._id;
+const isOwner = !!(wishlist?.user?._id && loggedInUserId && wishlist.user._id.toString() === loggedInUserId.toString());
+const totalValue = wishlist.items.reduce((acc, item) => acc + (item.product ? item.product.price : 0), 0);
+
+console.log("--- DEBUGGING DATA ---");
+console.log("Logged-in User (from Auth Context):", user);
+console.log("Wishlist Owner (from API):", wishlist?.user);
+
+console.log("Is Owner?:", isOwner);
+console.log("--- END DEBUGGING ---");
 
     return (
         <>
@@ -89,6 +95,7 @@ const WishlistDetailPage = () => {
                             </div>
                         )}
                         <div className="flex items-center gap-2">
+                            {/* This block will now render correctly */}
                             {isOwner && (
                                 <>
                                     <button onClick={() => setIsAddProductsModalOpen(true)} className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors">
@@ -108,7 +115,6 @@ const WishlistDetailPage = () => {
                 </p>
 
                 <div className="space-y-4">
-                    {/* All of your item mapping logic remains the same */}
                     {wishlist.items.length > 0 ? (
                         wishlist.items.filter(item => item.product).map((item) => {
                             const likers = item.ratings.filter(r => r.vote === 'like').map(r => r.user).filter(Boolean);
@@ -164,8 +170,6 @@ const WishlistDetailPage = () => {
                     )}
                 </div>
             </div>
-
-            {/* The ChatBox is no longer rendered here. It's handled by App.jsx */}
             
             {isShareModalOpen && <ShareWishlistModal currentWishlist={wishlist} onClose={() => { setIsShareModalOpen(false); loadWishlist(); }} />}
             {modalData && <VotersListModal {...modalData} onClose={() => setModalData(null)} />}

@@ -63,11 +63,14 @@ const removeItemFromWishlist = asyncHandler(async (req, res) => {
 });
 
 const deleteWishlist = asyncHandler(async (req, res) => {
+    console.log('Controller: Received delete request for ID:', req.params.id); // <-- ADD LOG
     const wishlist = await Wishlist.findById(req.params.id);
     if (wishlist && wishlist.user.equals(req.user.id)) {
         await wishlist.deleteOne();
+        console.log('Controller: Wishlist deleted successfully:', req.params.id); // <-- ADD LOG
         res.json({ message: 'Wishlist removed' });
     } else {
+        console.log('Controller: Wishlist not found or unauthorized for ID:', req.params.id); // <-- ADD LOG
         res.status(404);
         throw new Error('Wishlist not found or you are not authorized.');
     }

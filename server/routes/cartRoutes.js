@@ -1,21 +1,24 @@
-// server/routes/cartRoutes.js
-// Cart routes
-
 import express from 'express';
 import {
-    getUserCart,
-    addItemToCart,
-    updateCartItemQuantity,
-    removeItemFromCart,
+    getCart,
+    addToCart,
+    updateCartItem,
+    removeFromCart,
+    clearCart
 } from '../controllers/cartController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.route('/').get(protect, getUserCart).post(protect, addItemToCart);
-router
-    .route('/:productId')
-    .put(protect, updateCartItemQuantity)
-    .delete(protect, removeItemFromCart);
+// Routes for the entire cart
+router.route('/')
+    .get(protect, getCart)
+    .post(protect, addToCart)
+    .delete(protect, clearCart);
+
+// Routes for a specific item in the cart
+router.route('/:productId')
+    .put(protect, updateCartItem)
+    .delete(protect, removeFromCart);
 
 export default router;

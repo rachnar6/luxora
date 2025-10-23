@@ -1,4 +1,6 @@
 import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import cors from 'cors';
 import http from 'http';
 import { Server } from 'socket.io';
@@ -14,17 +16,21 @@ import productRoutes from './routes/productRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import sellerRoutes from './routes/sellerRoutes.js';
 import wishlistRoutes from './routes/wishlistRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import chatbotRoutes from './routes/chatbotRoutes.js';
-import Wishlist from './models/wishlistModel.js';
+import locationRoutes from './routes/locationRoutes.js';
 
 
 connectDB();
 
 const app = express();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Create HTTP server and integrate Socket.IO
 const server = http.createServer(app);
@@ -68,6 +74,9 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
@@ -79,7 +88,8 @@ app.use('/api/comments', commentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/chatbot', chatbotRoutes);
-
+app.use('/api/location', locationRoutes);
+app.use('/api/seller', sellerRoutes);
 
 // Root route for testing
 app.get('/', (req, res) => {

@@ -1,4 +1,3 @@
-// server/controllers/authController.js
 import crypto from 'crypto';
 import asyncHandler from '../utils/asyncHandler.js';
 import User from '../models/User.js';
@@ -13,11 +12,18 @@ const loginUser = asyncHandler(async (req, res) => {
   const user = await User.findOne({ email });
 
   if (user && (await user.matchPassword(password))) {
+    
+    const isAdmin = user.role === 'admin';
+    const isSeller = user.role === 'seller';
+
     res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
-      role: user.role,
+      isAdmin: isAdmin,
+      isSeller: isSeller,
+      profilePicture: user.profilePicture,
+      sellerApplicationStatus: user.sellerApplicationStatus, // <-- ADD THIS LINE
       token: generateToken(user),
     });
   } else {
@@ -49,7 +55,10 @@ const registerUser = asyncHandler(async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
-      role: user.role,
+      isAdmin: user.role === 'admin',
+      isSeller: user.role === 'seller',
+      profilePicture: user.profilePicture,
+      sellerApplicationStatus: user.sellerApplicationStatus, // <-- ADD THIS LINE
       token: generateToken(user),
     });
   } else {
@@ -69,7 +78,10 @@ const getUserProfile = asyncHandler(async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
-      role: user.role,
+      isAdmin: user.role === 'admin',
+      isSeller: user.role === 'seller',
+      profilePicture: user.profilePicture,
+      sellerApplicationStatus: user.sellerApplicationStatus, // <-- ADD THIS LINE
     });
   } else {
     res.status(404);
@@ -96,7 +108,10 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       _id: updatedUser._id,
       name: updatedUser.name,
       email: updatedUser.email,
-      role: updatedUser.role,
+      isAdmin: updatedUser.role === 'admin',
+      isSeller: updatedUser.role === 'seller',
+      profilePicture: updatedUser.profilePicture,
+      sellerApplicationStatus: updatedUser.sellerApplicationStatus, // <-- ADD THIS LINE
       token: generateToken(updatedUser),
     });
   } else {
@@ -148,7 +163,7 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
 // @access  Public
 const resetPassword = asyncHandler(async (req, res, next) => {
     const hashedToken = crypto
-        .createHash('sha266')
+        .createHash('sha256')
         .update(req.params.token)
         .digest('hex');
 
@@ -174,7 +189,6 @@ const resetPassword = asyncHandler(async (req, res, next) => {
     });
 });
 
-// THIS IS THE BLOCK THAT NEEDED FIXING
 export { 
     loginUser, 
     registerUser, 

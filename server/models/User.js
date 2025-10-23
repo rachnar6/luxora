@@ -6,7 +6,7 @@ import crypto from 'crypto'; // Ensure this import is present
 const addressSchema = mongoose.Schema({
     address: { type: String, required: true },
     city: { type: String, required: true },
-    postalCode: { type: String, required: true },
+    postalCode: { type: String },
     country: { type: String, required: true },
 });
 
@@ -20,9 +20,19 @@ const userSchema = mongoose.Schema({
         required: true,
         unique: true,
     },
+    googleId: { // Make sure you have a field for the Google ID
+        type: String,
+    },
     password: {
         type: String,
-        required: true,
+        required: [
+            function() { return !this.googleId; },
+            'Password is required'
+        ]
+    },
+    profilePicture: {
+        type: String,
+        default: '/images/default-avatar.png',
     },
     role: {
         type: String,
@@ -38,6 +48,29 @@ const userSchema = mongoose.Schema({
         enum: ['none', 'pending', 'approved', 'rejected'],
         default: 'none',
     },
+
+    seller: {
+    brandName: {
+      type: String,
+      trim: true,
+    },
+    bio: {
+      type: String,
+    },
+    contactEmail: {
+      type: String,
+    },
+    socialMedia: {
+      instagram: { type: String },
+      facebook: { type: String },
+      twitter: { type: String },
+      // Add any other platforms you want
+    },
+    logo: {
+      type: String,
+      default: '/images/default-store-logo.png'
+    }
+  },
     shippingAddresses: [addressSchema],
     
     // Fields for password reset
@@ -71,13 +104,24 @@ userSchema.methods.createPasswordResetToken = function() {
         .update(resetToken)
         .digest('hex');
 
-    // Set token to expire in 10 minutes
     this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
 
     // Return the unhashed token to be sent via email
     return resetToken;
 };
 
+userSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
+    console.log(`Deleting wishlists for user: ${this._id}`);
+    try {
+        // Find and delete all wishlists where the 'user' field matches this user's ID
+        await Wishlist.deleteMany({ user: this._id });
+        console.log(`Successfully deleted wishlists for user: ${this._id}`);
+        next(); // Continue with deleting the user
+    } catch (error) {
+        console.error(`Error deleting wishlists for user ${this._id}:`, error);
+        next(error); // Pass the error along to stop the user deletion if wishlist deletion fails
+    }
+});
 
 const User = mongoose.model('User', userSchema);
 export default User;

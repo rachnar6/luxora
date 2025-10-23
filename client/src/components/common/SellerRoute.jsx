@@ -7,15 +7,15 @@ const SellerRoute = () => {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <LoadingSpinner />;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
-  // Allow access if the user exists and their role is either 'seller' or 'admin'
-  return user && (user.role === 'seller' || user.role === 'admin') ? (
-    <Outlet />
-  ) : (
-    <Navigate to="/login" replace />
-  );
+  // Check for the correct boolean property
+  return user && user.isSeller ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 export default SellerRoute;

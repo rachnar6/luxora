@@ -34,7 +34,7 @@ router.get('/brands', getUniqueBrands);
 // @route   GET /api/products/deals
 router.get('/deals', getDeals);
 
-// @route   GET /api/products/top-selling
+// @route   GET /api/top-selling
 router.get('/top-selling', getTopSellingProducts);
 
 // @route   GET /api/products/latest

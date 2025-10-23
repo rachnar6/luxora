@@ -7,6 +7,10 @@ import CartItem from '../components/cart/CartItem';
 import { ShoppingCart, ArrowLeft, ShoppingBag } from 'lucide-react';
 
 const formatCurrency = (value) => {
+    // Add safety check for NaN
+    if (isNaN(value)) {
+        return '₹NaN'; // Or a default like '₹0.00'
+    }
     return new Intl.NumberFormat("en-IN", {
         style: "currency",
         currency: "INR",
@@ -48,7 +52,13 @@ const CartPage = () => {
         navigate('/checkout');
     };
 
-    const subtotal = cartItems.reduce((acc, item) => acc + item.qty * item.price, 0);
+    // ✅ THIS IS THE FIX: Access price via item.product.price
+    const subtotal = cartItems.reduce((acc, item) => {
+        // Add a safety check in case product data is missing
+        const price = item?.product?.price || 0;
+        return acc + item.qty * price;
+    }, 0);
+    
     const totalItems = cartItems.reduce((acc, item) => acc + item.qty, 0);
 
     if (loading) return <LoadingSpinner />;
@@ -72,6 +82,7 @@ const CartPage = () => {
                 <div className="grid lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-2">
                         {cartItems.map((item) => (
+                            // Ensure CartItem is also updated if it displays price directly
                             <CartItem
                                 key={item.product._id}
                                 item={item}
@@ -89,6 +100,7 @@ const CartPage = () => {
                             <div className="space-y-3 text-lg mb-6">
                                 <div className="flex justify-between font-semibold text-gray-800 dark:text-gray-100">
                                     <span>Subtotal ({totalItems} items)</span>
+                                    {/* Subtotal will now display correctly */}
                                     <span>{formatCurrency(subtotal)}</span>
                                 </div>
                                 <p className="text-sm text-gray-500 dark:text-gray-400 pt-2">
@@ -118,4 +130,3 @@ const CartPage = () => {
 };
 
 export default CartPage;
-

@@ -1,4 +1,6 @@
 import axios from 'axios';
+import API from './api'; 
+
 
 const API_URL = '/api/users';
 
@@ -30,6 +32,29 @@ export const searchUsers = async (keyword, token) => {
     return data;
 };
 
+export const getSellerProfile = async (token) => {
+    const config = {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    };
+    // This matches the backend route we created: GET /api/users/seller/profile
+    const { data } = await API.get('/users/seller/profile', config);
+    return data;
+};
+
+// --- ADD THIS FUNCTION ---
+export const updateSellerProfile = async (profileData, token) => {
+    const config = {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    };
+    // This matches the backend route we created: PUT /api/users/seller/profile
+    const { data } = await API.put('/users/seller/profile', profileData, config);
+    return data;
+};
+
 /**
  * Fetches the logged-in user's saved shipping addresses from the database.
  * @param {string} token - The user's authentication token.
@@ -52,3 +77,4 @@ export const addShippingAddress = async (address, token) => {
     const { data } = await axios.post(`${API_URL}/addresses`, address, config);
     return data;
 };
+

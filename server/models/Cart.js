@@ -1,22 +1,17 @@
-// server/models/Cart.js
-// Cart Model (simplified for a single user cart)
-
 import mongoose from 'mongoose';
 
 const cartItemSchema = mongoose.Schema({
+    // We only need to store the ID of the product
     product: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: 'Product',
     },
-    name: { type: String, required: true },
-    image: { type: String, required: true },
-    price: { type: Number, required: true },
     qty: {
         type: Number,
         required: true,
-        default: 1,
     },
+    // The name, price, and image fields are removed from the schema
 });
 
 const cartSchema = mongoose.Schema(
@@ -25,9 +20,8 @@ const cartSchema = mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             required: true,
             ref: 'User',
-            unique: true, // Each user has one cart
         },
-        items: [cartItemSchema],
+        items: [cartItemSchema], // Use the simplified schema
     },
     {
         timestamps: true,
@@ -35,5 +29,4 @@ const cartSchema = mongoose.Schema(
 );
 
 const Cart = mongoose.model('Cart', cartSchema);
-
 export default Cart;

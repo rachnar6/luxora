@@ -1,88 +1,120 @@
-import React, { createContext, useState, useContext } from 'react';
-import { login, register } from '../services/authService';
+import React, { createContext, useState, useContext, useCallback } from 'react';
+// Make sure login and register are correctly imported from authService
+import { login, register } from '../services/authService'; 
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    // This part is correct: it loads the user from localStorage on initial load
-    try {
-      const userInfo = localStorage.getItem('userInfo');
-      return userInfo ? JSON.parse(userInfo) : null;
-    } catch (error) {
-      console.error("Failed to parse user info from localStorage", error);
-      return null;
-    }
-  });
-  
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+    // Initialize user state from localStorage
+    const [user, setUserState] = useState(() => { // Renamed setUser to setUserState to avoid conflict
+        try {
+            const userInfo = localStorage.getItem('userInfo');
+            return userInfo ? JSON.parse(userInfo) : null;
+        } catch (error) {
+            console.error("Failed to parse user info from localStorage", error);
+            return null;
+        }
+    });
 
-  const loginUser = async (email, password) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await login(email, password);
-      
-      // --- FIXED: Save the complete user object to localStorage ---
-      localStorage.setItem('userInfo', JSON.stringify(data));
-      
-      setUser(data);
-      return data;
-    } catch (err) {
-      const message = err.response?.data?.message || 'Invalid email or password';
-      setError(message);
-      throw new Error(message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
-  const registerUser = async (name, email, password) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await register(name, email, password);
+    // --- THIS IS THE CORRECTED FUNCTION ---
+    // Function to update user state and localStorage with ALL necessary fields
+    const updateAuthUser = useCallback((updatedUserInfo) => {
+        if (!updatedUserInfo) { // Handle cases where updatedUserInfo might be null/undefined
+            localStorage.removeItem('userInfo');
+            setUserState(null);
+            return;
+        }
+        
+        // Ensure ALL required fields are included
+        const userDataToStore = {
+            _id: updatedUserInfo._id || user?._id,
+            name: updatedUserInfo.name,
+            email: updatedUserInfo.email,
+            profilePicture: updatedUserInfo.profilePicture,
+            isSeller: updatedUserInfo.isSeller,
+            isAdmin: updatedUserInfo.isAdmin, // Directly use the value from backend
+            sellerApplicationStatus: updatedUserInfo.sellerApplicationStatus, // Add this status
+            seller: updatedUserInfo.seller, // <-- ADD THE SELLER OBJECT
+            token: updatedUserInfo.token || user?.token
+        };
 
-      // --- FIXED: Save the complete user object to localStorage on registration ---
-      localStorage.setItem('userInfo', JSON.stringify(data));
+        // Remove undefined keys before storing to avoid issues
+        Object.keys(userDataToStore).forEach(key => {
+          if (userDataToStore[key] === undefined) {
+            delete userDataToStore[key];
+          }
+        });
 
-      setUser(data);
-      return data;
-    } catch (err) {
-      const message = err.response?.data?.message || 'Registration failed';
-      setError(message);
-      throw new Error(message);
-    } finally {
-      setLoading(false);
-    }
-  };
+        localStorage.setItem('userInfo', JSON.stringify(userDataToStore));
+        setUserState(userDataToStore); // Update the React state
+    }, [user]); // Dependency remains 'user' (previous state)
 
-  const logoutUser = () => {
-    localStorage.removeItem('userInfo');
-    setUser(null);
-  };
+    // Login function
+    const loginUser = async (email, password) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await login(email, password); // Fetch data from API
+            updateAuthUser(data); // Update state and localStorage
+            return data;
+        } catch (err) {
+            const message = err.response?.data?.message || 'Invalid email or password';
+            setError(message);
+            throw new Error(message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  return (
-    <AuthContext.Provider 
-      value={{ 
-        user, 
-        token: user?.token, // ADD THIS LINE
-        loading, 
-        error, 
-        loginUser, 
-        logoutUser, 
-        registerUser 
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+    // Register function
+    const registerUser = async (name, email, password) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await register(name, email, password); // Register via API
+            updateAuthUser(data); // Update state and localStorage
+            return data;
+        } catch (err) {
+            const message = err.response?.data?.message || 'Registration failed';
+            setError(message);
+            throw new Error(message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Logout function
+    const logoutUser = () => {
+        updateAuthUser(null); // Clear user data using the update function
+        // Optionally clear other related localStorage items
+        // localStorage.removeItem('shippingAddress');
+        // localStorage.removeItem('paymentMethod');
+    };
+
+    // Provide context value to children
+    return (
+        <AuthContext.Provider
+            value={{
+                user,
+                // Expose the update function correctly as 'setUser' for components using the context
+                setUser: updateAuthUser, 
+                token: user?.token,
+                loading,
+                error,
+                loginUser,
+                logoutUser,
+                registerUser
+            }}
+        >
+            {children}
+        </AuthContext.Provider>
+    );
 };
 
+// Custom hook to use the Auth context
 export const useAuth = () => {
-  return useContext(AuthContext);
+    return useContext(AuthContext);
 };
-
-// The AuthReducer below was not being used by your AuthProvider,
-// which uses useState hooks instead. It has been removed for clarity.

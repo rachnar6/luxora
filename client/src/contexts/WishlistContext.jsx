@@ -75,15 +75,18 @@ export const WishlistProvider = ({ children }) => {
     };
 
     const removeWishlist = async (wishlistId) => {
-        if (!user || !token) return;
-        try {
-            await deleteWishlist(wishlistId, token);
-            setWishlists(currentWishlists => currentWishlists.filter(w => w._id !== wishlistId));
-        } catch (err) {
-            setError(err.response?.data?.message || 'Failed to delete wishlist');
-            throw err;
-        }
-    };
+  if (!user || !token) return;
+  try {
+    console.log('WishlistContext: Calling service to delete ID:', wishlistId); // <-- ADD LOG
+    await deleteWishlist(wishlistId, token);
+    setWishlists(currentWishlists => currentWishlists.filter(w => w._id !== wishlistId));
+    console.log('WishlistContext: State updated after delete.'); // <-- ADD LOG
+  } catch (err) {
+    console.error('WishlistContext: Delete failed:', err); // <-- ADD LOG
+    setError(err.response?.data?.message || 'Failed to delete wishlist');
+    // Do NOT re-throw the error here if you want the component to handle UI updates
+  }
+};
 
     return (
         <WishlistContext.Provider 

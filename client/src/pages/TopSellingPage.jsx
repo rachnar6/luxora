@@ -1,6 +1,3 @@
-// client/src/pages/TopSellingPage.jsx
-// Displays the top selling products
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, TrendingUp } from 'lucide-react';
@@ -23,7 +20,14 @@ const TopSellingPage = () => {
       setError(null);
       try {
         const data = await getTopSellingProducts();
-        setProducts(data);
+        if (Array.isArray(data)) {
+          setProducts(data);
+        } else if (data && Array.isArray(data.products)) {
+          // Defensive: If wrapped like {products: [...]}
+          setProducts(data.products);
+        } else {
+          setProducts([]);
+        }
         setLoading(false);
       } catch (err) {
         console.error("Error fetching top selling products:", err.response ? err.response.data : err.message);
@@ -37,9 +41,7 @@ const TopSellingPage = () => {
     fetchProducts();
   }, []);
 
-  if (loading) {
-    return <LoadingSpinner />;
-  }
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-8 max-w-6xl mx-auto my-8">
@@ -51,6 +53,8 @@ const TopSellingPage = () => {
         <TrendingUp className="w-8 h-8 text-green-500" /> Top Selling Products
       </h1>
 
+      
+
       {error && !showToast ? (
         <div className="text-center text-red-500 text-xl mt-8">{error}</div>
       ) : products.length === 0 ? (
@@ -58,10 +62,15 @@ const TopSellingPage = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {products.map((product) => (
-            <ProductCard key={product._id} product={product} />
+            // Defensive: render a fallback name if missing
+            <div key={product._id || product.id}>
+              <ProductCard product={product} />
+              <div className="text-sm text-gray-400">{product.name || "(No Name)"}</div>
+            </div>
           ))}
         </div>
       )}
+
       {showToast && (
         <NotificationToast
           message={toastMessage}

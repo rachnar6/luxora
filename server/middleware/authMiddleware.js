@@ -30,12 +30,22 @@ const admin = (req, res, next) => {
 };
 
 const seller = (req, res, next) => {
-    if (req.user && (req.user.role === 'seller' || req.user.role === 'admin')) {
-        next();
+  if (req.user && req.user.isSeller) {
+    next();
+  } else {
+    res.status(401);
+    throw new Error('Not authorized as a seller');
+  }
+};
+
+const isSeller = (req, res, next) => {
+    // Check if user is attached by 'protect' and if isSeller is true
+    if (req.user && req.user.isSeller) {
+        next(); // User is a seller, proceed
     } else {
-        res.status(401);
+        res.status(403); // Forbidden status
         throw new Error('Not authorized as a seller');
     }
 };
 
-export { protect, admin, seller };
+export { protect, admin, seller, isSeller };

@@ -2,40 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-
 body {
-  font-family: 'Inter', sans-serif;
   background-color: #FAFAFA;
   color: #4A4A4A;
+  @apply transition-colors duration-300;
 }
 
-/* --- ✅ FIX STARTS HERE --- */
-
-/* This hides the default Google Translate dropdown menu */
-#google_translate_element {
-  display: none;
+/* --- Dark Theme --- */
+html.dark body {
+  background-color: #1a202c;
+  color: #cbd5e0;
 }
 
-/* This hides the banner that appears at the top of the page */
-.goog-te-banner-frame {
-  display: none !important;
+/* --- Blue Theme --- */
+html.blue {
+  --color-primary-blue: #3b82f6;
+  --color-background-blue: #eff6ff;
+  --color-text-blue: #1e3a8a;
+  --color-card-bg-blue: #ffffff;
+  --color-border-blue: #bfdbfe;
 }
-
-/* This prevents the banner from pushing your whole site down */
-body {
-  top: 0 !important;
+html.blue body {
+  background-color: var(--color-background-blue);
+  color: var(--color-text-blue);
 }
+/* Optional overrides for blue theme */
+html.blue .bg-white { background-color: var(--color-card-bg-blue); }
+html.blue .dark\:bg-gray-800 { background-color: var(--color-card-bg-blue); }
+html.blue .dark\:bg-gray-900 { background-color: var(--color-background-blue); }
+html.blue .border-gray-200 { border-color: var(--color-border-blue); }
+html.blue .dark\:border-gray-700 { border-color: var(--color-border-blue); }
+html.blue .text-gray-900 { color: var(--color-text-blue); }
+html.blue .dark\:text-gray-100 { color: var(--color-text-blue); }
+html.blue .text-primary { color: var(--color-primary-blue); }
+html.blue .bg-primary { background-color: var(--color-primary-blue); color: white; }
 
-/* --- ✅ FIX ENDS HERE --- */
+/* --- Google Translate Fixes --- */
+#google_translate_element { display: none; }
+.goog-te-banner-frame { display: none !important; }
+body { top: 0 !important; }
 
 
-/* For the typewriter caret effect */
+/* --- Animations (These are fine) --- */
 .typing-effect {
   border-right: .15em solid #FF6F61; /* Primary color */
   white-space: nowrap;
   overflow: hidden;
-  animation: 
+  animation:
     typing 1.5s steps(6, end),
     blink-caret .75s step-end infinite;
 }
@@ -49,7 +62,6 @@ body {
   from, to { border-color: transparent }
   50% { border-color: #FF6F61; } /* Primary color */
 }
-
 
 .pop-in {
     animation: popIn 0.5s ease-out forwards;
@@ -88,4 +100,13 @@ body {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* Ensure slide-in for sidebar is defined if you use it */
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+.animate-slide-in-right {
+  animation: slideInRight 0.3s ease-out forwards;
 }

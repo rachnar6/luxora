@@ -45,6 +45,13 @@ const updateUser = asyncHandler(async (req, res) => {
     user.name = req.body.name || user.name;
     user.email = req.body.email || user.email;
     user.role = req.body.role || user.role;
+    
+    // --- FIX ---
+    // Also update isSeller if the role is changed to seller
+    if(req.body.role === 'seller') {
+        user.isSeller = true;
+    }
+    // --- END FIX ---
 
     const updatedUser = await user.save();
     res.json({
@@ -70,7 +77,7 @@ const createProduct = asyncHandler(async (req, res) => {
     const product = new Product({
         name: 'Sample Name',
         price: 0,
-        user: req.user._id,
+        user: req.user._id, // This should be the admin or seller ID
         image: '/images/sample.jpg',
         brand: 'Sample Brand',
         category: 'Sample Category',
@@ -137,15 +144,22 @@ const updateOrderToDelivered = asyncHandler(async (req, res) => {
 // --- SELLER APPLICATION MANAGEMENT ---
 
 const getSellerApplications = asyncHandler(async (req, res) => {
-  const pendingUsers = await User.find({ 'seller.status': 'Pending' });
+  // --- FIX ---
+  // Querying the correct field: 'sellerApplicationStatus'
+  const pendingUsers = await User.find({ sellerApplicationStatus: 'pending' });
+  // --- END FIX ---
   res.json(pendingUsers);
 });
 
 const approveSellerApplication = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
   if (user) {
+    // --- FIX ---
+    // Set all the correct fields
     user.role = 'seller';
-    user.seller.status = 'Approved';
+    user.isSeller = true; 
+    user.sellerApplicationStatus = 'approved';
+    // --- END FIX ---
     await user.save();
     res.json({ message: 'User approved as seller' });
   } else {
@@ -157,7 +171,11 @@ const approveSellerApplication = asyncHandler(async (req, res) => {
 const rejectSellerApplication = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
   if (user) {
-    user.seller.status = 'Rejected';
+    // --- FIX ---
+    // Set all the correct fields
+    user.isSeller = false;
+    user.sellerApplicationStatus = 'rejected';
+    // --- END FIX ---
     await user.save();
     res.json({ message: 'Seller application rejected' });
   } else {
@@ -180,7 +198,7 @@ export {
   getProducts,
   deleteProduct,
   createProduct,
-  updateProduct, // REMOVED the duplicate from here
+  updateProduct,
   getOrders,
   updateOrderToDelivered,
   getSellerApplications,
