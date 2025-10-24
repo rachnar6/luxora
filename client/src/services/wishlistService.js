@@ -1,103 +1,87 @@
-import axios from 'axios';
-
-const API_URL = '/api/wishlist';
+import API from './api'; // We only need our API instance
 
 // --- CORE WISHLIST FUNCTIONS ---
 
-export const getMyWishlists = async (token) => {
-  const config = { headers: { Authorization: `Bearer ${token}` } };
-  const { data } = await axios.get(API_URL, config);
-  return data;
+export const getMyWishlists = async () => {
+    // API instance handles token and base URL
+    const { data } = await API.get('/wishlist');
+    return data;
 };
 
-export const createWishlist = async (name, validUntil, token) => {
-  const config = { headers: { Authorization: `Bearer ${token}` } };
-  const body = { name, validUntil: validUntil || null };
-  const { data } = await axios.post(API_URL, body, config);
-  return data;
+export const createWishlist = async (name, validUntil) => {
+    const body = { name, validUntil: validUntil || null };
+    const { data } = await API.post('/wishlist', body);
+    return data;
 };
 
-export const addItemToWishlist = async (wishlistId, productId, token) => {
-  const config = { headers: { Authorization: `Bearer ${token}` } };
-  const { data } = await axios.post(`${API_URL}/${wishlistId}/items`, { productId }, config);
-  return data;
+export const addItemToWishlist = async (wishlistId, productId) => {
+    const { data } = await API.post(`/wishlist/${wishlistId}/items`, { productId });
+    return data;
 };
 
-export const removeItemFromWishlist = async (wishlistId, itemId, token) => {
-  const config = { headers: { Authorization: `Bearer ${token}` } };
-  await axios.delete(`${API_URL}/${wishlistId}/items/${itemId}`, config);
+export const removeItemFromWishlist = async (wishlistId, itemId) => {
+    await API.delete(`/wishlist/${wishlistId}/items/${itemId}`);
 };
 
-export const deleteWishlist = async (wishlistId, token) => {
-    const config = { headers: { Authorization: `Bearer ${token}` } };
-    await axios.delete(`${API_URL}/${wishlistId}`, config);
+export const deleteWishlist = async (wishlistId) => {
+    await API.delete(`/wishlist/${wishlistId}`);
 };
-
 
 // --- SHARING & VIEWING FUNCTIONS ---
 
-export const getWishlistById = async (wishlistId, token) => {
-    const config = { headers: { Authorization: `Bearer ${token}` } };
-    const { data } = await axios.get(`${API_URL}/${wishlistId}`, config);
+export const getWishlistById = async (wishlistId) => {
+    const { data } = await API.get(`/wishlist/${wishlistId}`);
     return data;
 };
 
-export const updateShareList = async (wishlistId, sharedWithIds, token) => {
-    const config = { headers: { Authorization: `Bearer ${token}` } };
-    const { data } = await axios.put(`${API_URL}/${wishlistId}/share`, { sharedWith: sharedWithIds }, config);
+export const updateShareList = async (wishlistId, sharedWithIds) => {
+    const { data } = await API.put(`/wishlist/${wishlistId}/share`, { sharedWith: sharedWithIds });
     return data;
 };
 
-export const getSharedWithMe = async (token) => {
-    const config = { headers: { Authorization: `Bearer ${token}` } };
-    const { data } = await axios.get(`${API_URL}/shared-with-me`, config);
+export const getSharedWithMe = async () => {
+    const { data } = await API.get('/wishlist/shared-with-me');
     return data;
 };
-
 
 // --- INTERACTIVE FUNCTIONS ---
 
-export const rateWishlistItem = async (wishlistId, itemId, voteType, token) => {
-  const config = { headers: { Authorization: `Bearer ${token}` } };
-  const { data } = await axios.post(`${API_URL}/${wishlistId}/items/${itemId}/rate`, { voteType }, config);
-  return data;
-};
-
-export const addNote = async (wishlistId, itemId, note, token) => {
-    const config = { headers: { Authorization: `Bearer ${token}` } };
-    const { data } = await axios.put(`${API_URL}/${wishlistId}/items/${itemId}/note`, { note }, config);
+export const rateWishlistItem = async (wishlistId, itemId, voteType) => {
+    const { data } = await API.post(`/wishlist/${wishlistId}/items/${itemId}/rate`, { voteType });
     return data;
 };
 
-export const addChatMessage = async (wishlistId, text, token) => {
-    const config = { headers: { Authorization: `Bearer ${token}` } };
-    const { data } = await axios.post(`${API_URL}/${wishlistId}/chat`, { text }, config);
+export const addNote = async (wishlistId, itemId, note) => {
+    const { data } = await API.put(`/wishlist/${wishlistId}/items/${itemId}/note`, { note });
     return data;
 };
 
+export const addChatMessage = async (wishlistId, text) => {
+    const { data } = await API.post(`/wishlist/${wishlistId}/chat`, { text });
+    return data;
+};
 
 // --- PUBLIC SHARING FUNCTIONS ---
 
-export const generateShareLink = async (wishlistId, token) => {
-    const config = { headers: { Authorization: `Bearer ${token}` } };
-    const { data } = await axios.post(`${API_URL}/${wishlistId}/generate-share-link`, {}, config);
+export const generateShareLink = async (wishlistId) => {
+    const { data } = await API.post(`/wishlist/${wishlistId}/generate-share-link`, {});
     return data;
 };
 
 export const getSharedWishlist = async (shareToken) => {
-    const { data } = await axios.get(`${API_URL}/shared/${shareToken}`);
+    // This is a public route, so API interceptor won't add a token (which is correct)
+    const { data } = await API.get(`/wishlist/shared/${shareToken}`);
     return data;
 };
 
-export const addComment = async (token, wishlistToken, productId, text) => {
-    const config = { headers: { Authorization: `Bearer ${token}` } };
-    const { data } = await axios.post(`${API_URL}/shared/${wishlistToken}/comment`, { productId, text }, config);
+export const addComment = async (wishlistToken, productId, text) => {
+    // API interceptor will add token if user is logged in
+    const { data } = await API.post(`/wishlist/shared/${wishlistToken}/comment`, { productId, text });
     return data;
 };
 
-// ✅ RESTORED: This function was missing and is now added back.
-export const voteOnItem = async (token, wishlistToken, productId) => {
-    const config = { headers: { Authorization: `Bearer ${token}` } };
-    const { data } = await axios.post(`${API_URL}/shared/${wishlistToken}/vote`, { productId }, config);
+export const voteOnItem = async (wishlistToken, productId) => {
+    // API interceptor will add token if user is logged in
+    const { data } = await API.post(`/wishlist/shared/${wishlistToken}/vote`, { productId });
     return data;
 };
