@@ -10,7 +10,7 @@ const GoogleLoginButton = () => {
   const handleGoogleLogin = () => {
     // This redirects the browser to our backend's Google authentication route.
     // Ensure your server is running on port 5000.
-    window.location.href = 'http://localhost:5000/api/auth/google';
+    window.location.href = `${process.env.REACT_APP_API_URL}/api/auth/google`;
   };
 
   return (

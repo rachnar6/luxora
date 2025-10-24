@@ -10,7 +10,7 @@ const GoogleLoginButton = () => {
   const handleGoogleLogin = () => {
     // This button works for both login and registration because our backend
     // has "find or create" logic.
-    window.location.href = 'http://localhost:5000/api/auth/google';
+    window.location.href = `${process.env.REACT_APP_API_URL}/api/auth/google`;
   };
 
   return (
