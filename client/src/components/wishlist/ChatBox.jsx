@@ -3,7 +3,7 @@ import io from 'socket.io-client';
 import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
 import { Send, MessageCircle, X } from 'lucide-react';
-import API from '../../api';
+import API from '../../services/api';
 
 const socket = io(process.env.REACT_APP_API_URL);
 
