@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getProductsBySeller } from '../../services/productService'; 
+import { getProductsBySeller } from '../../services/productService'; // Make sure this path is correct
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { Package } from 'lucide-react';
 
 const ProductsBySellerPage = () => {
-    const { id: sellerId } = useParams(); 
-    const [products, setProducts] = useState([]); // Initial state is correct
+    const { id: sellerId } = useParams(); // Get seller ID from the URL
+    const [products, setProducts] = useState([]); // Default state is an empty array
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -14,10 +14,13 @@ const ProductsBySellerPage = () => {
         const fetchProducts = async () => {
             try {
                 const data = await getProductsBySeller(sellerId);
-                // --- FIX ---
-                // Ensure data is an array before setting state
-                // If data is null or undefined, set an empty array
-                setProducts(Array.isArray(data) ? data : []); 
+                // Ensure the data is an array before setting state
+                if (Array.isArray(data)) {
+                    setProducts(data);
+                } else {
+                    // If API returns null/undefined, set an empty array to prevent map error
+                    setProducts([]); 
+                }
             } catch (err) {
                 setError(err.message || 'Failed to fetch products.');
             } finally {
@@ -47,7 +50,7 @@ const ProductsBySellerPage = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
-                            {/* --- FIX --- 
+                            {/* --- THIS IS THE FIX ---
                               Check if the array has items before mapping.
                               If not, show a "No products" message.
                             */}
