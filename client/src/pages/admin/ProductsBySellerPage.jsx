@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getProductsBySeller } from '../../services/productService'; // You'll need to create this service
+import { getProductsBySeller } from '../../services/productService'; 
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { Package } from 'lucide-react';
 
 const ProductsBySellerPage = () => {
-    const { id: sellerId } = useParams(); // Get seller ID from the URL
-    const [products, setProducts] = useState([]);
+    const { id: sellerId } = useParams(); 
+    const [products, setProducts] = useState([]); // Initial state is correct
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -14,7 +14,10 @@ const ProductsBySellerPage = () => {
         const fetchProducts = async () => {
             try {
                 const data = await getProductsBySeller(sellerId);
-                setProducts(data);
+                // --- FIX ---
+                // Ensure data is an array before setting state
+                // If data is null or undefined, set an empty array
+                setProducts(Array.isArray(data) ? data : []); 
             } catch (err) {
                 setError(err.message || 'Failed to fetch products.');
             } finally {
@@ -36,22 +39,34 @@ const ProductsBySellerPage = () => {
             <p className="mb-4 text-gray-500">Seller ID: {sellerId}</p>
             <div className="overflow-x-auto">
                 <table className="min-w-full bg-white">
-                     <thead className="bg-gray-50">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product ID</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                        {products.map((product) => (
-                            <tr key={product._id}>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm">{product._id}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">{product.name}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm">${product.price}</td>
+                        <thead className="bg-gray-50">
+                            <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product ID</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
                             </tr>
-                        ))}
-                    </tbody>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                            {/* --- FIX --- 
+                              Check if the array has items before mapping.
+                              If not, show a "No products" message.
+                            */}
+                            {products.length > 0 ? (
+                                products.map((product) => (
+                                    <tr key={product._id}>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">{product._id}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">{product.name}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">${product.price}</td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="3" className="px-6 py-4 text-center text-gray-500">
+                                        No products found for this seller.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
                 </table>
             </div>
         </div>
