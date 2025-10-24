@@ -1,10 +1,10 @@
 import axios from 'axios';
 
+// Use environment variable for API base URL
 const API = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: 'http://server:5000/api',  // 'server' = name of backend service in docker-compose.yml
 });
-
-// This interceptor runs before every request is sent.
+// Attach token before each request
 API.interceptors.request.use((req) => {
   const userInfo = localStorage.getItem('userInfo');
   
@@ -12,7 +12,6 @@ API.interceptors.request.use((req) => {
     try {
       const token = JSON.parse(userInfo).token;
       if (token) {
-        // Attach the token to the Authorization header
         req.headers.Authorization = `Bearer ${token}`;
       }
     } catch (error) {
