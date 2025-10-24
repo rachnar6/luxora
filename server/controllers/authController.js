@@ -134,7 +134,7 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
     const resetToken = user.createPasswordResetToken();
     await user.save({ validateBeforeSave: false });
 
-    const resetURL = `http://localhost:3000/resetpassword/${resetToken}`;
+    const resetURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
     const message = `Forgot your password? Click the link to reset it: ${resetURL} \n\nIf you didn't forget your password, please ignore this email!`;
 
     try {

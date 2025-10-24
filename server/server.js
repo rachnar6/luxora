@@ -36,7 +36,7 @@ const __dirname = path.dirname(__filename);
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000", // Your frontend URL
+    origin: process.env.FRONTEND_URL,
     methods: ["GET", "POST"]
   }
 });

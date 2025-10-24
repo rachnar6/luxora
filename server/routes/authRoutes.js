@@ -35,7 +35,7 @@ router.post('/resetpassword/:token', resetPassword);
 router.get(
   '/google/callback',
   passport.authenticate('google', {
-    failureRedirect: 'http://localhost:3000/login',
+    failureRedirect: `${process.env.FRONTEND_URL}/login`,
     session: false,
   }),
   (req, res) => {
@@ -44,7 +44,7 @@ router.get(
     const token = generateToken(req.user);
     
     // Redirect the user back to the frontend, passing the token in the URL.
-    res.redirect(`http://localhost:3000/login/success?token=${token}`);
+res.redirect(`${process.env.FRONTEND_URL}/login/success?token=${token}`);
   }
 );
 
