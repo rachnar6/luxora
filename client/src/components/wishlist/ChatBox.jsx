@@ -3,8 +3,9 @@ import io from 'socket.io-client';
 import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
 import { Send, MessageCircle, X } from 'lucide-react';
+import API from '../../api';
 
-const socket = io('http://localhost:5000'); // Your backend URL
+const socket = io(process.env.REACT_APP_API_URL);
 
 const ChatBox = ({ wishlistId, initialMessages = [] }) => {
     const { user, token } = useAuth();
@@ -50,7 +51,7 @@ const ChatBox = ({ wishlistId, initialMessages = [] }) => {
         
         try {
             const config = { headers: { Authorization: `Bearer ${token}` } };
-            await axios.post(`/api/wishlist/${wishlistId}/chat`, { text: newMessage }, config);
+            await API.post(`/wishlist/${wishlistId}/chat`, { text: newMessage }, config);
         } catch (error) {
             console.error("Failed to save message", error);
         }

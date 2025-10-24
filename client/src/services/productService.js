@@ -72,15 +72,14 @@ export const createProductReview = async (productId, reviewData) => {
 // Fetches details for a single product
 // Using axios directly here - consider switching to API instance for consistency
 export const getProductDetails = async (productId) => {
-    // It's often better to use API.get for consistency if '/api' is your base path
-    const { data } = await axios.get(`/api/products/${productId}`);
-    return data;
+    const { data } = await API.get(`/products/${productId}`); // CORRECT
+    return data;
 };
 
 // Fetches products related to a specific product
 // Using axios directly - consider switching to API instance
 export const getRelatedProducts = async (productId) => {
-    const { data } = await axios.get(`/api/products/${productId}/related`);
+    const { data } = await API.get(`/products/${productId}/related`);
     return data;
 };
 
@@ -88,21 +87,21 @@ export const getRelatedProducts = async (productId) => {
 // Fetches all products listed by a specific seller ID
 // Using axios directly - consider switching to API instance
 export const getProductsBySeller = async (sellerId) => {
-    const { data } = await axios.get(`/api/products/seller/${sellerId}`);
+    const { data } = await API.get(`/products/seller/${sellerId}`);
     return data;
 };
 
 // Fetches all unique category names (Duplicate of getUniqueCategories, consider removing one)
 // Using axios directly - consider switching to API instance
 export const getCategories = async () => {
-    const { data } = await axios.get('/api/products/categories');
+    const { data } = await API.get('/products/categories');
     return data;
 };
 
 // Fetches unique brand names, optionally filtered by category
 // Using axios directly - consider switching to API instance
 export const getBrands = async (category = '') => {
-    const { data } = await axios.get(`/api/products/brands?category=${encodeURIComponent(category)}`); // Ensure category is encoded
+    const { data } = await API.get(`/products/brands?category=${encodeURIComponent(category)}`); // Ensure category is encoded
     return data;
 };
 
