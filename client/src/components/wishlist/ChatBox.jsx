@@ -1,26 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
 import { useAuth } from '../../contexts/AuthContext';
-import axios from 'axios';
+import API from '../../services/api'; // <-- CORRECTED IMPORT PATH
 import { Send, MessageCircle, X } from 'lucide-react';
-import API from '../../services/api';
 
+// --- THIS IS THE FIX ---
+// Connects to your live backend URL from the .env variable
 const socket = io(process.env.REACT_APP_API_URL);
 
 const ChatBox = ({ wishlistId, initialMessages = [] }) => {
-    const { user, token } = useAuth();
+    const { user, token } = useAuth(); // Token is no longer needed for API call
     const [messages, setMessages] = useState(initialMessages);
     const [newMessage, setNewMessage] = useState('');
     const messagesEndRef = useRef(null);
-
-    // --- STEP 1: Add state to manage the open/closed state of the chat ---
     const [isOpen, setIsOpen] = useState(false);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
-    // This effect runs only once to set up the socket connection and listeners
     useEffect(() => {
         socket.emit('joinWishlist', wishlistId);
 
@@ -33,7 +31,6 @@ const ChatBox = ({ wishlistId, initialMessages = [] }) => {
         };
     }, [wishlistId]);
 
-    // This effect scrolls to the bottom whenever new messages arrive
     useEffect(scrollToBottom, [messages]);
 
     const handleSendMessage = async (e) => {
@@ -50,8 +47,9 @@ const ChatBox = ({ wishlistId, initialMessages = [] }) => {
         socket.emit('sendMessage', { wishlistId, message: messageData });
         
         try {
-            const config = { headers: { Authorization: `Bearer ${token}` } };
-            await API.post(`/wishlist/${wishlistId}/chat`, { text: newMessage }, config);
+            // --- THIS IS THE FIX ---
+            // Use the API instance. The token is added automatically.
+            await API.post(`/wishlist/${wishlistId}/chat`, { text: newMessage });
         } catch (error) {
             console.error("Failed to save message", error);
         }
@@ -59,7 +57,6 @@ const ChatBox = ({ wishlistId, initialMessages = [] }) => {
         setNewMessage('');
     };
 
-    // --- STEP 2: The UI now depends on the 'isOpen' state ---
     return (
         <div className="fixed bottom-8 right-8 z-50">
             {isOpen ? (

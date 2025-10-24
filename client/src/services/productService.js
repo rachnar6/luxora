@@ -1,22 +1,17 @@
-import axios from 'axios';
-import API from './api'; // Assuming 'api.js' sets up your base URL and interceptors
+import API from './api'; // Assuming 'api.js' is in the same 'services' folder
 
 // Fetches products with various filters
 export const getProducts = async (filters = {}) => {
-    // Destructure all potential filters
     const { category, brand, minPrice, maxPrice, searchTerm, rating } = filters;
+    const params = new URLSearchParams();
 
-    const params = new URLSearchParams(); // Creates URL parameters handler
-
-    // Append parameters ONLY if they exist and have a value
     if (category) params.append('category', category);
     if (brand) params.append('brand', brand);
     if (minPrice) params.append('minPrice', minPrice);
     if (maxPrice) params.append('maxPrice', maxPrice);
-    if (searchTerm) params.append('keyword', searchTerm); // Use 'keyword' to match backend
+    if (searchTerm) params.append('keyword', searchTerm);
     if (rating) params.append('rating', rating);
 
-    // Make the API call using the configured API instance (handles base URL)
     const { data } = await API.get(`/products?${params.toString()}`);
     return data;
 };
@@ -45,92 +40,79 @@ export const getLatestProducts = async () => {
     return data;
 };
 
-// Submits a new product review (using FormData for potential media)
+// Submits a new product review
 export const createProductReview = async (productId, reviewData) => {
     const formData = new FormData();
     formData.append('rating', reviewData.rating);
     formData.append('comment', reviewData.comment);
 
-    // Append media files if they exist
     if (reviewData.media && reviewData.media.length > 0) {
         for (let i = 0; i < reviewData.media.length; i++) {
             formData.append('media', reviewData.media[i]);
         }
     }
 
-    // The API instance (from api.js) should handle the token via interceptors
     const config = {
         headers: {
-            'Content-Type': 'multipart/form-data', // Important for file uploads
+            'Content-Type': 'multipart/form-data',
         },
     };
-
+    // The API interceptor will add the token
     const { data } = await API.post(`/products/${productId}/reviews`, formData, config);
     return data;
 };
 
 // Fetches details for a single product
-// Using axios directly here - consider switching to API instance for consistency
 export const getProductDetails = async (productId) => {
-    const { data } = await API.get(`/products/${productId}`); // CORRECT
-    return data;
+    const { data } = await API.get(`/products/${productId}`);
+    return data;
 };
 
 // Fetches products related to a specific product
-// Using axios directly - consider switching to API instance
 export const getRelatedProducts = async (productId) => {
     const { data } = await API.get(`/products/${productId}/related`);
     return data;
 };
 
-
 // Fetches all products listed by a specific seller ID
-// Using axios directly - consider switching to API instance
 export const getProductsBySeller = async (sellerId) => {
     const { data } = await API.get(`/products/seller/${sellerId}`);
     return data;
 };
 
-// Fetches all unique category names (Duplicate of getUniqueCategories, consider removing one)
-// Using axios directly - consider switching to API instance
+// Fetches all unique category names
 export const getCategories = async () => {
     const { data } = await API.get('/products/categories');
     return data;
 };
 
 // Fetches unique brand names, optionally filtered by category
-// Using axios directly - consider switching to API instance
 export const getBrands = async (category = '') => {
-    const { data } = await API.get(`/products/brands?category=${encodeURIComponent(category)}`); // Ensure category is encoded
+    const { data } = await API.get(`/products/brands?category=${encodeURIComponent(category)}`);
     return data;
 };
 
-// --- Functions requiring Authentication (Token likely handled by API instance interceptor) ---
+// --- Functions requiring Authentication ---
 
 // Fetches products created by the currently logged-in seller
 export const getMyProducts = async () => {
-    // Assumes API instance handles the token
     const { data } = await API.get('/products/myproducts');
     return data;
 };
 
 // Creates a new product
 export const createProduct = async (productData) => {
-    // Assumes API instance handles the token and sets Content-Type
     const { data } = await API.post('/products', productData);
     return data;
 };
 
 // Deletes a product by ID
 export const deleteProduct = async (productId) => {
-    // Assumes API instance handles the token
     await API.delete(`/products/${productId}`);
-    // Typically, DELETE doesn't return significant data, maybe just a success message
 };
 
 // Updates an existing product
 export const updateProduct = async (productId, productData) => {
-    // Assumes API instance handles the token and sets Content-Type
     const { data } = await API.put(`/products/${productId}`, productData);
     return data;
 };

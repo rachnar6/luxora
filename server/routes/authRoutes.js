@@ -32,20 +32,13 @@ router.post('/resetpassword/:token', resetPassword);
 // @desc    Google auth callback (where Google redirects to after login)
 // @route   GET /api/auth/google/callback
 // @access  Public
-router.get(
-  '/google/callback',
-  passport.authenticate('google', {
-    failureRedirect: `${process.env.FRONTEND_URL}/login`,
-    session: false,
-  }),
-  (req, res) => {
-    // On successful authentication, Passport attaches the user object to req.user.
-    // CHANGED: Pass the full user object to generate the token.
-    const token = generateToken(req.user);
-    
-    // Redirect the user back to the frontend, passing the token in the URL.
-res.redirect(`${process.env.FRONTEND_URL}/login/success?token=${token}`);
-  }
+router.get('/google/callback',
+    passport.authenticate('google', {
+        failureRedirect: `${process.env.FRONTEND_URL}/login`,
+    }),
+    (req, res) => {
+        res.redirect(`${process.env.FRONTEND_URL}/login/success`);
+    }
 );
 
 export default router;
