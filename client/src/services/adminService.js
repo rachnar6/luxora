@@ -71,7 +71,7 @@ export const getSellerApplications = async (token) => {
       Authorization: `Bearer ${token}`,
     },
   };
-  const { data } = await axios.get('/api/admin/seller-applications', config);
+  const { data } = await API.get('/api/admin/seller-applications', config);
   return data;
 };
 
@@ -82,7 +82,7 @@ export const approveSellerApplication = async (userId, token) => {
       Authorization: `Bearer ${token}`,
     },
   };
-  const { data } = await axios.put(`/api/admin/seller-applications/${userId}/approve`, {}, config);
+  const { data } = await API.put(`/api/admin/seller-applications/${userId}/approve`, {}, config);
   return data;
 };
 
@@ -93,7 +93,7 @@ export const rejectSellerApplication = async (userId, token) => {
       Authorization: `Bearer ${token}`,
     },
   };
-  const { data } = await axios.put(`/api/admin/seller-applications/${userId}/reject`, {}, config);
+  const { data } = await API.put(`/api/admin/seller-applications/${userId}/reject`, {}, config);
   return data;
 };
 
@@ -104,7 +104,7 @@ export const getSellers = async (token) => {
     },
   };
   // This calls the specific backend route for sellers
-  const { data } = await axios.get('/api/admin/sellers', config);
+  const { data } = await API.get('/api/admin/sellers', config);
   return data;
 };
 
@@ -115,6 +115,6 @@ export const updateOrderStatus = async (orderId, status, token) => {
             Authorization: `Bearer ${token}` 
         } 
     };
-    const { data } = await axios.put(`/api/orders/${orderId}/status`, { status }, config);
+    const { data } = await API.put(`/api/orders/${orderId}/status`, { status }, config);
     return data;
 };
